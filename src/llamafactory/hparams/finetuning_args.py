@@ -208,6 +208,30 @@ class RLHFArguments:
         default="lora",
         metadata={"help": "The type of the reward model in PPO training. Lora model only supports lora training."},
     )
+    reward_cosine_wrong_min: float = field(
+        default=-1.0,
+        metadata={"help": "Minimum reward for wrong answers"}
+    )
+    reward_cosine_wrong_max: float = field(
+        default=-0.5,
+        metadata={"help": "Maximum reward for wrong answers"}
+    )
+    reward_cosine_correct_min: float = field(
+        default=0.5,
+        metadata={"help": "Minimum reward for correct answers"}
+    )
+    reward_cosine_correct_max: float = field(
+        default=1.0,
+        metadata={"help": "Maximum reward for correct answers"}
+    )
+    reward_cosine_max_len: int = field(
+        default=1000,
+        metadata={"help": "Maximum length for scaling"}
+    )
+    reward_funcs: List[str] = field(
+        default=None,
+        metadata={"help": "reward functions for GRPO"}
+    )
 
 
 @dataclass
@@ -471,6 +495,9 @@ class FinetuningArguments(
 
         if self.stage == "dpo" and self.pref_loss != "sigmoid" and self.dpo_label_smoothing > 1e-6:
             raise ValueError("`dpo_label_smoothing` is only valid for sigmoid loss function.")
+        
+        if self.stage == "grpo" and self.reward_funcs == None:
+            raise ValueError("`reward_funcs` is necessary for GRPO training.")
 
         if self.use_llama_pro and self.finetuning_type == "full":
             raise ValueError("`use_llama_pro` is only valid for Freeze or LoRA training.")
